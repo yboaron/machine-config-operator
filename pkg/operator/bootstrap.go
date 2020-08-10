@@ -197,9 +197,16 @@ func RenderBootstrap(
 		if err := os.MkdirAll(dirname, 0655); err != nil {
 			return err
 		}
-		if err := ioutil.WriteFile(path, b, 0644); err != nil {
-			return err
+		if m.filename == "baremetal/manifests/chk_ocp_script.sh" {
+			if err := ioutil.WriteFile(path, b, 0655); err != nil {
+				return err
+			}
+		} else {
+			if err := ioutil.WriteFile(path, b, 0644); err != nil {
+				return err
+			}
 		}
+
 	}
 	return nil
 }
@@ -223,6 +230,10 @@ func appendManifestsByPlatform(manifests []manifest, infra configv1.Infrastructu
 			manifest{
 				name:     "manifests/baremetal/keepalived.conf.tmpl",
 				filename: "baremetal/static-pod-resources/keepalived/keepalived.conf.tmpl",
+			},
+			manifest{
+				name:     "manifests/baremetal/chk_ocp_script.sh",
+				filename: "baremetal/manifests/chk_ocp_script.sh",
 			},
 		)
 	}
