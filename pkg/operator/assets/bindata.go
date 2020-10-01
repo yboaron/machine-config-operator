@@ -269,7 +269,7 @@ var _manifestsBaremetalKeepalivedConfTmpl = []byte(`# Configuration template for
     state BACKUP
     interface {{.VRRPInterface}}
     virtual_router_id {{.Cluster.APIVirtualRouterID }}
-    priority 70
+    priority 50
     advert_int 1
     {{ if .EnableUnicast }}
     unicast_src_ip {{.NonVirtualIP}}
@@ -332,6 +332,14 @@ spec:
   - name: run-dir
     empty-dir: {}
   containers:
+  - name: keepalived-unicast
+    image: {{ .Images.BaremetalRuntimeCfgBootstrap }}
+    command:
+    - unicastipserver
+    - "--api-vip"
+    - "{{ .ControllerConfig.Infra.Status.PlatformStatus.BareMetal.APIServerInternalIP }}"
+    - "--ingress-vip"
+    - "{{ .ControllerConfig.Infra.Status.PlatformStatus.BareMetal.IngressIP }}"
   - name: keepalived
     securityContext:
       privileged: true
@@ -368,7 +376,7 @@ spec:
           if [ "$line" = reload ]; then
               reload_keepalived
           elif  [ "$line" = stop ]; then
-              stop_keepalived
+              echo "Stop not implemented !!!!!!!!!!!1" >&2
           fi
         done
       }

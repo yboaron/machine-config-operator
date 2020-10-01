@@ -24,6 +24,14 @@ spec:
   - name: run-dir
     empty-dir: {}
   containers:
+  - name: keepalived-unicast
+    image: {{ .Images.BaremetalRuntimeCfgBootstrap }}
+    command:
+    - unicastipserver
+    - "--api-vip"
+    - "{{ .ControllerConfig.Infra.Status.PlatformStatus.BareMetal.APIServerInternalIP }}"
+    - "--ingress-vip"
+    - "{{ .ControllerConfig.Infra.Status.PlatformStatus.BareMetal.IngressIP }}"
   - name: keepalived
     securityContext:
       privileged: true
@@ -60,7 +68,7 @@ spec:
           if [ "$line" = reload ]; then
               reload_keepalived
           elif  [ "$line" = stop ]; then
-              stop_keepalived
+              echo "Stop not implemented !!!!!!!!!!!1" >&2
           fi
         done
       }
