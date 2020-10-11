@@ -1,7 +1,5 @@
 // Code generated for package assets by go-bindata DO NOT EDIT. (@generated)
 // sources:
-// manifests/baremetal/coredns-corefile.tmpl
-// manifests/baremetal/coredns.yaml
 // manifests/baremetal/keepalived.conf.tmpl
 // manifests/baremetal/keepalived.yaml
 // manifests/bootstrap-pod-v2.yaml
@@ -95,165 +93,6 @@ func (fi bindataFileInfo) IsDir() bool {
 // Sys return file is sys mode
 func (fi bindataFileInfo) Sys() interface{} {
 	return nil
-}
-
-var _manifestsBaremetalCorednsCorefileTmpl = []byte(`. {
-    errors
-    health :18080
-    mdns {{ .ControllerConfig.Infra.Status.EtcdDiscoveryDomain }} {{`+"`"+`{{.Cluster.MasterAmount}}`+"`"+`}} {{`+"`"+`{{.Cluster.Name}}`+"`"+`}} {{`+"`"+`{{.NonVirtualIP}}`+"`"+`}}
-    forward . {{`+"`"+`{{- range $upstream := .DNSUpstreams}} {{$upstream}}{{- end}}`+"`"+`}}
-    cache 30
-    reload
-    template IN {{`+"`"+`{{ .Cluster.IngressVIPRecordType }}`+"`"+`}} {{ .ControllerConfig.Infra.Status.EtcdDiscoveryDomain }} {
-        match .*.apps.{{ .ControllerConfig.Infra.Status.EtcdDiscoveryDomain }}
-        answer "{{`+"`"+`{{"{{ .Name }}"}}`+"`"+`}} 60 in {{`+"`"+`{{"{{ .Type }}"}}`+"`"+`}} {{ .ControllerConfig.Infra.Status.PlatformStatus.BareMetal.IngressIP }}"
-        fallthrough
-    }
-    template IN {{`+"`"+`{{ .Cluster.IngressVIPEmptyType }}`+"`"+`}} {{ .ControllerConfig.Infra.Status.EtcdDiscoveryDomain }} {
-        match .*.apps.{{ .ControllerConfig.Infra.Status.EtcdDiscoveryDomain }}
-        fallthrough
-    }
-    template IN {{`+"`"+`{{ .Cluster.APIVIPRecordType }}`+"`"+`}} {{ .ControllerConfig.Infra.Status.EtcdDiscoveryDomain }} {
-        match api.{{ .ControllerConfig.Infra.Status.EtcdDiscoveryDomain }}
-        answer "{{`+"`"+`{{"{{ .Name }}"}}`+"`"+`}} 60 in {{`+"`"+`{{"{{ .Type }}"}}`+"`"+`}} {{ .ControllerConfig.Infra.Status.PlatformStatus.BareMetal.APIServerInternalIP }}"
-        fallthrough
-    }
-    template IN {{`+"`"+`{{ .Cluster.APIVIPEmptyType }}`+"`"+`}} {{ .ControllerConfig.Infra.Status.EtcdDiscoveryDomain }} {
-        match api.{{ .ControllerConfig.Infra.Status.EtcdDiscoveryDomain }}
-        fallthrough
-    }
-    template IN {{`+"`"+`{{ .Cluster.APIVIPRecordType }}`+"`"+`}} {{ .ControllerConfig.Infra.Status.EtcdDiscoveryDomain }} {
-        match api-int.{{ .ControllerConfig.Infra.Status.EtcdDiscoveryDomain }}
-        answer "{{`+"`"+`{{"{{ .Name }}"}}`+"`"+`}} 60 in {{`+"`"+`{{"{{ .Type }}"}}`+"`"+`}} {{ .ControllerConfig.Infra.Status.PlatformStatus.BareMetal.APIServerInternalIP }}"
-        fallthrough
-    }
-    template IN {{`+"`"+`{{ .Cluster.APIVIPEmptyType }}`+"`"+`}} {{ .ControllerConfig.Infra.Status.EtcdDiscoveryDomain }} {
-        match api-int.{{ .ControllerConfig.Infra.Status.EtcdDiscoveryDomain }}
-        fallthrough
-    }
-}
-`)
-
-func manifestsBaremetalCorednsCorefileTmplBytes() ([]byte, error) {
-	return _manifestsBaremetalCorednsCorefileTmpl, nil
-}
-
-func manifestsBaremetalCorednsCorefileTmpl() (*asset, error) {
-	bytes, err := manifestsBaremetalCorednsCorefileTmplBytes()
-	if err != nil {
-		return nil, err
-	}
-
-	info := bindataFileInfo{name: "manifests/baremetal/coredns-corefile.tmpl", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info: info}
-	return a, nil
-}
-
-var _manifestsBaremetalCorednsYaml = []byte(`---
-kind: Pod
-apiVersion: v1
-metadata:
-  name: coredns
-  namespace: openshift-kni-infra
-  creationTimestamp:
-  deletionGracePeriodSeconds: 65
-  labels:
-    app: kni-infra-mdns
-spec:
-  volumes:
-  - name: resource-dir
-    hostPath:
-      path: "/etc/kubernetes/static-pod-resources/coredns"
-  - name: kubeconfig
-    hostPath:
-      path: "/etc/kubernetes/kubeconfig"
-  - name: conf-dir
-    empty-dir: {}
-  - name: manifests
-    hostPath:
-      path: "/opt/openshift/manifests"
-  initContainers:
-  - name: render-config
-    image: {{ .Images.BaremetalRuntimeCfgBootstrap }}
-    command:
-    - runtimecfg
-    - render
-    - "/etc/kubernetes/kubeconfig"
-    - "--api-vip"
-    - "{{ .ControllerConfig.Infra.Status.PlatformStatus.BareMetal.APIServerInternalIP }}"
-    - "--ingress-vip"
-    - "{{ .ControllerConfig.Infra.Status.PlatformStatus.BareMetal.IngressIP }}"
-    - "/config"
-    - "--out-dir"
-    - "/etc/coredns"
-    - "--cluster-config"
-    - "/opt/openshift/manifests/cluster-config.yaml"
-    resources: {}
-    volumeMounts:
-    - name: kubeconfig
-      mountPath: "/etc/kubernetes/kubeconfig"
-    - name: resource-dir
-      mountPath: "/config"
-    - name: conf-dir
-      mountPath: "/etc/coredns"
-    - name: manifests
-      mountPath: "/opt/openshift/manifests"
-    imagePullPolicy: IfNotPresent
-  containers:
-  - name: coredns
-    securityContext:
-      privileged: true
-    image: {{ .Images.CorednsBootstrap }}
-    args:
-    - "--conf"
-    - "/etc/coredns/Corefile"
-    resources:
-      requests:
-        cpu: 100m
-        memory: 200Mi
-    volumeMounts:
-    - name: conf-dir
-      mountPath: "/etc/coredns"
-    readinessProbe:
-      httpGet:
-        path: /health
-        port: 18080
-        scheme: HTTP
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      successThreshold: 1
-      failureThreshold: 3
-      timeoutSeconds: 10
-    livenessProbe:
-      httpGet:
-        path: /health
-        port: 18080
-        scheme: HTTP
-      initialDelaySeconds: 60
-      timeoutSeconds: 5
-      successThreshold: 1
-      failureThreshold: 5
-    terminationMessagePolicy: FallbackToLogsOnError
-  hostNetwork: true
-  tolerations:
-  - operator: Exists
-  priorityClassName: system-node-critical
-status: {}
-`)
-
-func manifestsBaremetalCorednsYamlBytes() ([]byte, error) {
-	return _manifestsBaremetalCorednsYaml, nil
-}
-
-func manifestsBaremetalCorednsYaml() (*asset, error) {
-	bytes, err := manifestsBaremetalCorednsYamlBytes()
-	if err != nil {
-		return nil, err
-	}
-
-	info := bindataFileInfo{name: "manifests/baremetal/coredns.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info: info}
-	return a, nil
 }
 
 var _manifestsBaremetalKeepalivedConfTmpl = []byte(`# Configuration template for Keepalived, which is used to manage the DNS and
@@ -2835,8 +2674,6 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"manifests/baremetal/coredns-corefile.tmpl":                              manifestsBaremetalCorednsCorefileTmpl,
-	"manifests/baremetal/coredns.yaml":                                       manifestsBaremetalCorednsYaml,
 	"manifests/baremetal/keepalived.conf.tmpl":                               manifestsBaremetalKeepalivedConfTmpl,
 	"manifests/baremetal/keepalived.yaml":                                    manifestsBaremetalKeepalivedYaml,
 	"manifests/bootstrap-pod-v2.yaml":                                        manifestsBootstrapPodV2Yaml,
@@ -2925,10 +2762,8 @@ type bintree struct {
 var _bintree = &bintree{nil, map[string]*bintree{
 	"manifests": &bintree{nil, map[string]*bintree{
 		"baremetal": &bintree{nil, map[string]*bintree{
-			"coredns-corefile.tmpl": &bintree{manifestsBaremetalCorednsCorefileTmpl, map[string]*bintree{}},
-			"coredns.yaml":          &bintree{manifestsBaremetalCorednsYaml, map[string]*bintree{}},
-			"keepalived.conf.tmpl":  &bintree{manifestsBaremetalKeepalivedConfTmpl, map[string]*bintree{}},
-			"keepalived.yaml":       &bintree{manifestsBaremetalKeepalivedYaml, map[string]*bintree{}},
+			"keepalived.conf.tmpl": &bintree{manifestsBaremetalKeepalivedConfTmpl, map[string]*bintree{}},
+			"keepalived.yaml":      &bintree{manifestsBaremetalKeepalivedYaml, map[string]*bintree{}},
 		}},
 		"bootstrap-pod-v2.yaml":     &bintree{manifestsBootstrapPodV2Yaml, map[string]*bintree{}},
 		"controllerconfig.crd.yaml": &bintree{manifestsControllerconfigCrdYaml, map[string]*bintree{}},
